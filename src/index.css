@@ -108,7 +108,6 @@ audio,
 video {
   margin: 0;
   padding: 0;
-  border: 0;
   font: inherit;
 }
 
@@ -138,7 +137,6 @@ textarea {
 
 input {
   outline: none;
-  border: none;
   background: none;
 }
 
