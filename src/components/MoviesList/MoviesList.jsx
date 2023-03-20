@@ -5,7 +5,6 @@ import { MovieItem } from '../MovieItem/MovieItem';
 import { statusActions } from '../../constants';
 import { Rejected } from '../Rejected/Rejected';
 import { Nothing } from '../Nothing/Nothing';
-import axios from 'axios';
 
 const { IDLE, PENDING, RESOLVED, REJECTED } = statusActions;
 
