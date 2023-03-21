@@ -29,6 +29,7 @@ export const Reviews = () => {
   return (
     <div>
       <ul>
+        {reviews.length === 0 && <div>⛔ Немає відгуків для цього фільму</div>}
         {reviews.map(({ id, author, content }) => (
           <ReviewsItem key={id} author={author} content={content} />
         ))}
