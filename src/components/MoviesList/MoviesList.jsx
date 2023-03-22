@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react';
+import axios from 'axios';
 import PropTypes from 'prop-types';
-import { getByKeyWord, getFilmPhoto, getPopular } from '../../services';
+
 import { MovieItem } from '../MovieItem/MovieItem';
-import { statusActions } from '../../constants';
 import { Rejected } from '../Rejected/Rejected';
 import { Nothing } from '../Nothing/Nothing';
+
+import { setPopularFilms } from '../../utils/setPopularFilms';
+import { statusActions } from '../../constants';
 
 const { IDLE, PENDING, RESOLVED, REJECTED } = statusActions;
 
@@ -19,37 +22,18 @@ export const MoviesList = ({
 }) => {
   const [totalPages, setTotalPages] = useState(0);
 
-  // Функція-обгортка одразу для зручного встановлення фільмів
-  const setPopularFilms = async () => {
-    const { results, total_pages } =
-      query === 0 ? await getPopular(page) : await getByKeyWord(query, page);
-
-    // Симуляція бекенда
-    await new Promise(r => setTimeout(r, 500));
-
-    const films = results.map(({ id, title, poster_path }) => ({
-      id,
-      title,
-      poster: getFilmPhoto(poster_path),
-    }));
-
-    setTotalPages(total_pages);
-    addItems(films);
-  };
-
-  // Для кнопки Load More
-  const handleOnLoadMore = () => {
-    incrementPage();
-  };
-
   // Effect при зміні пропсу query
   useEffect(() => {
     if (query === '' || query === null) return;
 
+    // Для очищення запиту при ComponentWillUnmount
+    const CancelToken = axios.CancelToken;
+    const source = CancelToken.source();
+
     (async () => {
       try {
         setStatus(PENDING);
-        await setPopularFilms();
+        await setPopularFilms(query, page, setTotalPages, addItems);
         setStatus(RESOLVED);
       } catch (err) {
         console.log(err);
@@ -57,10 +41,14 @@ export const MoviesList = ({
       }
     })();
 
+    return () => {
+      // Власне очищення request
+      source.cancel();
+    };
+
     // eslint-disable-next-line
   }, [query, page]);
 
-  // Повернена розмітка
   return (
     <>
       <ul>
@@ -72,7 +60,7 @@ export const MoviesList = ({
       </ul>
 
       {page < totalPages && status !== PENDING && (
-        <button onClick={handleOnLoadMore}>Завантажити ще ...</button>
+        <button onClick={incrementPage}>Завантажити ще ...</button>
       )}
 
       {status === PENDING && <p>Завантажуються фільми ...</p>}

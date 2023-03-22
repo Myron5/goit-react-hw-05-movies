@@ -8,9 +8,11 @@ const staticURLparams = {
 };
 
 // Список найпопулярніших фільмів на сьогодні
-export const getPopular = async page => {
+export const getPopular = async (page, token = null) => {
   const searchParams = new URLSearchParams({ ...staticURLparams, page });
-  const { data } = await axios.get(`/trending/movie/day?${searchParams}`);
+  const { data } = await axios.get(`/trending/movie/day?${searchParams}`, {
+    cancelToken: token,
+  });
   return data;
 };
 
